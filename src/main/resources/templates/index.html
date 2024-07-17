@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="fragments/head :: head"></head>
+
+<body class="index-page">
+    <div th:replace="fragments/navbar:: navbar"></div>
+
+    <div class="wrapper">
+        <section class="section section-hero section-shaped">
+            <div class="shape shape-style-1 shape-default">
+                <span class="span-150"></span>
+                <span class="span-50"></span>
+                <span class="span-50"></span>
+                <span class="span-75"></span>
+                <span class="span-100"></span>
+                <span class="span-75"></span>
+                <span class="span-50"></span>
+                <span class="span-100"></span>
+                <span class="span-50"></span>
+                <span class="span-100"></span>
+            </div>
+            <div class="page-header">
+                <div class="container shape-container d-flex align-items-center py-6">
+                    <div class="col-lg-7 mx-auto">
+                        <div th:replace="fragments/alert :: alert"></div>
+                        <img src="/images/title.svg" style="width: 100%" class="img-fluid mt-2" />
+                        <p class="lead text-white text-center">Set up an appointment to get your COVID-19
+                            vaccine!</p>
+
+                        <form id="appointment-form" class="mt-5 mx-auto" action="make-appointment" method="POST">
+                            <span class="text-white">Choose a vaccination center:</span>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fa fa-clinic-medical"></i>
+                                                </span>
+                                    </div>
+                                    <select name="center_id" id="select-center" class="form-control">
+                                    </select>
+                                </div>
+                            </div>
+                            <!--<select class="form-control mt-1 mb-3 border-0" name="center_id" id="select-center">
+                            </select>-->
+                            <span class="text-white">Select the perfect day:</span>
+                            <div class="form-group">
+                                <div class="input-group date vaccine-datepicker">
+                                    <div class="input-group-addon">
+                                                <span class="input-group-text">
+                                                    <i class="fa fa-calendar"></i>
+                                                </span>
+                                    </div>
+                                    <input type="text" class="form-control"
+                                           name="date" id="select-date"/>
+                                </div>
+                            </div>
+
+                            <span class="text-white">Pick the right time slot:</span>
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fa fa-clock"></i>
+                                                </span>
+                                    </div>
+                                    <select name="time" id="select-time" class="form-control">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-neutral-outline btn-success">
+                                    <span class="btn-inner--icon"><i class="fa fa-syringe mr-2"></i></span>
+                                    Make appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div th:insert="fragments/chatbot :: chatbot"></div>
+        </section>
+        <footer th:insert="fragments/footer :: footer"></footer>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const appSlots = /*[[${appSlots}]]*/ null;
+        /*]]>*/
+        const selectCenter = document.getElementById('select-center');
+        const selectDate = document.getElementById('select-date');
+        const selectTime = document.getElementById('select-time');
+
+        const vaxCenters = new Set();
+        for (let i = 0; i < appSlots.length; i++) {
+            const vaccineCenter = appSlots[i].vaccineCentre;
+            if (!vaxCenters.has(vaccineCenter.id)) {
+                vaxCenters.add(vaccineCenter.id);
+
+                const opt = document.createElement('option');
+                opt.value = vaccineCenter.id;
+                opt.innerHTML = vaccineCenter.name;
+                selectCenter.appendChild(opt);
+            }
+        }
+
+        selectCenter.addEventListener('change', (e) => {
+            applyDateSlots(e.target.value);
+            applyTimeSlots(selectDate.value);
+        });
+
+        // Format function to ensure date formats match
+        function formatDate(d) {
+            const parts = d.split(/[-\/]/); // Split date by - or /
+            return parts[2] + '/' + parts[1] + '/' + parts[0]; // Assuming date is in yyyy-mm-dd format
+        }
+
+        function applyDateSlots(centerId) {
+            const centerAppSlots = appSlots.filter((slot) => slot.vaccineCentre.id == centerId);
+            const centerDates = [...new Set(centerAppSlots.map((slot) => slot.date))];
+            $(".vaccine-datepicker").datepicker({
+                format: "dd/mm/yyyy",
+                startDate: "+1d",
+                endDate: "+95d",
+                beforeShowDay: function(date){
+                    var d = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+                    return centerDates.indexOf(d) !== -1 ? true : false;
+                },
+                defaultViewDate: formatDate(centerDates[0])
+            });
+            $('#select-date').val(formatDate(centerDates[0]));
+            $(".vaccine-datepicker").datepicker('setDate', formatDate(centerDates[0]));
+        }
+
+        function applyTimeSlots(date) {
+            selectTime.innerHTML = ''; // Assuming selectTime is already defined
+            const centerId = selectCenter.value; // Assuming selectCenter is already defined
+
+            // Filter slots based on center ID and formatted date
+            const timeSlots = appSlots.filter((slot) => {
+                const formattedSlotDate = formatDate(slot.date);
+                return slot.vaccineCentre.id == centerId && formattedSlotDate == date;
+            });
+
+            for (const slot of timeSlots) {
+                const startDate = new Date(slot.date + ' ' + slot.startTime);
+                const endDate = new Date(startDate.getTime() + 15 * 60000);
+                const opt2 = document.createElement('option');
+                opt2.value = slot.startTime;
+                // Ensure minutes are displayed with two digits
+                const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+                opt2.innerHTML = slot.startTime.substring(0, slot.startTime.length - 3) + ' - ' + endDate.getHours() + ':' + endMinutes;
+                selectTime.appendChild(opt2);
+            }
+        }
+
+        $('.vaccine-datepicker').on('changeDate', function() {
+            $('#select-date').val(
+                $('.vaccine-datepicker').datepicker('getFormattedDate')
+            );
+            applyTimeSlots(selectDate.value);
+        });
+
+        applyDateSlots(selectCenter.value);
+        applyTimeSlots(selectDate.value);
+    </script>
+
+</body>
+
+</html>

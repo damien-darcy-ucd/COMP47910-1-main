@@ -1,0 +1,69 @@
+<th:block th:fragment="chatbot">
+        <!-- Button to open chat modal -->
+    <button id="chatButton" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#chatModal">
+        Chat with us
+    </button>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel" aria-hidden="true" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-custom" role="document">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">Chat with us</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="chatContent" class="modal-body modal-body-custom">
+                    <!-- Chat content goes here -->
+                    <p><strong>Bot:</strong> Hello! How can we help you?</p>
+                    <p><strong>Bot:</strong> COVID vaccines are essential to controlling the spread of the virus and protecting individuals from severe illness. These vaccines have undergone rigorous testing and have been proven to be safe and effective in preventing COVID-19 infection. They work by stimulating the immune system to produce antibodies against the virus. Vaccines such as Pfizer-BioNTech, Moderna, and Johnson &amp; Johnson have been authorized for emergency use by various regulatory agencies. Getting vaccinated not only protects oneself but also helps in achieving herd immunity, reducing the overall transmission of the virus. It is crucial for everyone to get vaccinated to help bring an end to the pandemic.</p>
+                </div>
+                <div class="modal-footer">
+                    <form class="form-inline w-100" id="chatForm">
+                        <div class="form-group w-100 d-flex flex-row">
+                            <input class="form-control w-75" type="text" id="chatInput" placeholder="Message...">
+                            <button type="submit" class="btn btn-primary ml-auto" id="sendButton">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            function scrollWithMessages() {
+                var chatContent = document.getElementById('chatContent');
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }
+
+
+            $('#chatForm').submit(function(event) {
+                event.preventDefault(); // Prevent the form from submitting the default way
+                var prompt = $('#chatInput').val();
+                console.debug(prompt);
+                if (prompt) {
+                    $.ajax({
+                        url: '/chat',
+                        type: 'GET',
+                        data: { prompt: prompt },
+                        success: function(response) {
+                            $('#chatContent').append('<p><strong>You:</strong> ' + prompt + '</p>');
+                            $('#chatContent').append('<p><strong>Bot:</strong> ' + response + '</p>');
+                            $('#chatInput').val(''); // Clear the input field
+                            scrollWithMessages();
+                        },
+                        error: function() {
+                            $('#chatContent').append('<p><strong>Error:</strong> Unable to get response from server</p>');
+                        }
+                    });
+                }
+            });
+
+            $('#chatModal').on('shown.bs.modal', function () {
+                scrollWithMessages();
+            });
+        });
+    </script>
+</th:block>

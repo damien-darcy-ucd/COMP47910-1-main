@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<head th:insert="fragments/head :: head"></head>
+
+<body class="stats-page">
+    <div th:replace="fragments/navbar:: navbar"></div>
+
+    <script th:inline="javascript">
+        const nationalities = [[${nationalities}]];
+        const dosesByNationality = [[${dosesByNationality}]];
+        const maleDosePercent = [[${maleDosePercent}]];
+        const femaleDosePercent = [[${femaleDosePercent}]];
+        const ageRanges = [[${agerange}]];
+        const statsByVaccineType = [[${statsByVaccineType}]];
+        const totalDoses = [[${totalDoses}]];
+        const dosesByAllNationalities = [[${dosesByAllNationalities}]];
+        console.debug(`${dosesByNationality} ${maleDosePercent} ${femaleDosePercent} ${JSON.stringify(ageRanges)} ${statsByVaccineType} ${totalDoses}`);
+    </script>
+
+    <div class="wrapper">
+        <div class="section section-shaped">
+            <div class="navbar-background"></div>
+            <div class="page-header">
+                <div class="container py-lg px-4">
+                    <div class="container-fluid" >
+                        <div class="row mb-1">
+                            <form class="d-flex col-6" id="nationalityForm" action="stats" method="post" >
+                                <input type="hidden" name="nationality" id="nationalityInput" multiple>
+                                <div class="dropdown">
+                                    <a href="#" class="btn btn-default" data-toggle="dropdown" id="navbarDropdownMenuLink2">
+                                        <div class="d-flex">
+                                            <span class="mr-auto">Nationality</span>
+                                            <span class="dropdown-toggle ml-2"></span>
+                                        </div>
+                                        <div th:if="${nationalities != null && !nationalities.isEmpty()}" class="d-flex flex-wrap mt-1">
+                                            <div th:each="i: ${#numbers.sequence(0,nationalities.size()-1)}" class="badge badge-pill badge-secondary mr-0 ml-1 mb-1">
+                                                <span th:class="'flag-icon flag-icon-' + ${flagCodes[i]}"></span>
+                                                <span th:text="${nationalities[i]}"></span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                    <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto; overflow-x: hidden;" aria-labelledby="navbarDropdownMenuLink2">
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('afghan')"><span class="flag-icon flag-icon-af"></span> Afghan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('albanian')"><span class="flag-icon flag-icon-al"></span> Albanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('algerian')"><span class="flag-icon flag-icon-dz"></span> Algerian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('american')"><span class="flag-icon flag-icon-us"></span> American</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('andorran')"><span class="flag-icon flag-icon-ad"></span> Andorran</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('angolan')"><span class="flag-icon flag-icon-ao"></span> Angolan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('antiguans')"><span class="flag-icon flag-icon-ag"></span> Antiguans</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('argentinean')"><span class="flag-icon flag-icon-ar"></span> Argentinean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('armenian')"><span class="flag-icon flag-icon-am"></span> Armenian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('australian')"><span class="flag-icon flag-icon-au"></span> Australian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('austrian')"><span class="flag-icon flag-icon-at"></span> Austrian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('azerbaijani')"><span class="flag-icon flag-icon-az"></span> Azerbaijani</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bahamian')"><span class="flag-icon flag-icon-bs"></span> Bahamian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bahraini')"><span class="flag-icon flag-icon-bh"></span> Bahraini</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bangladeshi')"><span class="flag-icon flag-icon-bd"></span> Bangladeshi</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('barbadian')"><span class="flag-icon flag-icon-bb"></span> Barbadian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('barbudans')"><span class="flag-icon flag-icon-ag"></span> Barbudans</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('batswana')"><span class="flag-icon flag-icon-bw"></span> Batswana</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('belarusian')"><span class="flag-icon flag-icon-by"></span> Belarusian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('belgian')"><span class="flag-icon flag-icon-be"></span> Belgian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('belizean')"><span class="flag-icon flag-icon-bz"></span> Belizean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('beninese')"><span class="flag-icon flag-icon-bj"></span> Beninese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bhutanese')"><span class="flag-icon flag-icon-bt"></span> Bhutanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bolivian')"><span class="flag-icon flag-icon-bo"></span> Bolivian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bosnian')"><span class="flag-icon flag-icon-ba"></span> Bosnian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('brazilian')"><span class="flag-icon flag-icon-br"></span> Brazilian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('british')"><span class="flag-icon flag-icon-gb"></span> British</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bruneian')"><span class="flag-icon flag-icon-bn"></span> Bruneian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('bulgarian')"><span class="flag-icon flag-icon-bg"></span> Bulgarian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('burkinabe')"><span class="flag-icon flag-icon-bf"></span> Burkinabe</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('burmese')"><span class="flag-icon flag-icon-mm"></span> Burmese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('burundian')"><span class="flag-icon flag-icon-bi"></span> Burundian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('cambodian')"><span class="flag-icon flag-icon-kh"></span> Cambodian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('cameroonian')"><span class="flag-icon flag-icon-cm"></span> Cameroonian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('canadian')"><span class="flag-icon flag-icon-ca"></span> Canadian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('cape verdean')"><span class="flag-icon flag-icon-cv"></span> Cape Verdean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('central african')"><span class="flag-icon flag-icon-cf"></span> Central African</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('chadian')"><span class="flag-icon flag-icon-td"></span> Chadian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('chilean')"><span class="flag-icon flag-icon-cl"></span> Chilean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('chinese')"><span class="flag-icon flag-icon-cn"></span> Chinese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('colombian')"><span class="flag-icon flag-icon-co"></span> Colombian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('comoran')"><span class="flag-icon flag-icon-km"></span> Comoran</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('congolese')"><span class="flag-icon flag-icon-cg"></span> Congolese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('costa rican')"><span class="flag-icon flag-icon-cr"></span> Costa Rican</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('croatian')"><span class="flag-icon flag-icon-hr"></span> Croatian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('cuban')"><span class="flag-icon flag-icon-cu"></span> Cuban</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('cypriot')"><span class="flag-icon flag-icon-cy"></span> Cypriot</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('czech')"><span class="flag-icon flag-icon-cz"></span> Czech</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('danish')"><span class="flag-icon flag-icon-dk"></span> Danish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('djibouti')"><span class="flag-icon flag-icon-dj"></span> Djibouti</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('dominican')"><span class="flag-icon flag-icon-do"></span> Dominican</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('dutch')"><span class="flag-icon flag-icon-nl"></span> Dutch</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('east timorese')"><span class="flag-icon flag-icon-tl"></span> East Timorese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ecuadorean')"><span class="flag-icon flag-icon-ec"></span> Ecuadorean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('egyptian')"><span class="flag-icon flag-icon-eg"></span> Egyptian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('emirian')"><span class="flag-icon flag-icon-ae"></span> Emirian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('equatorial guinean')"><span class="flag-icon flag-icon-gq"></span> Equatorial Guinean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('eritrean')"><span class="flag-icon flag-icon-er"></span> Eritrean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('estonian')"><span class="flag-icon flag-icon-ee"></span> Estonian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ethiopian')"><span class="flag-icon flag-icon-et"></span> Ethiopian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('fijian')"><span class="flag-icon flag-icon-fj"></span> Fijian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('filipino')"><span class="flag-icon flag-icon-ph"></span> Filipino</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('finnish')"><span class="flag-icon flag-icon-fi"></span> Finnish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('french')"><span class="flag-icon flag-icon-fr"></span> French</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('gabonese')"><span class="flag-icon flag-icon-ga"></span> Gabonese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('gambian')"><span class="flag-icon flag-icon-gm"></span> Gambian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('georgian')"><span class="flag-icon flag-icon-ge"></span> Georgian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('german')"><span class="flag-icon flag-icon-de"></span> German</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ghanaian')"><span class="flag-icon flag-icon-gh"></span> Ghanaian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('greek')"><span class="flag-icon flag-icon-gr"></span> Greek</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('grenadian')"><span class="flag-icon flag-icon-gd"></span> Grenadian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('guatemalan')"><span class="flag-icon flag-icon-gt"></span> Guatemalan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('guinea-bissauan')"><span class="flag-icon flag-icon-gw"></span> Guinea-Bissauan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('guinean')"><span class="flag-icon flag-icon-gn"></span> Guinean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('guyanese')"><span class="flag-icon flag-icon-gy"></span> Guyanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('haitian')"><span class="flag-icon flag-icon-ht"></span> Haitian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('herzegovinian')"><span class="flag-icon flag-icon-ba"></span> Herzegovinian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('honduran')"><span class="flag-icon flag-icon-hn"></span> Honduran</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('hungarian')"><span class="flag-icon flag-icon-hu"></span> Hungarian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('icelander')"><span class="flag-icon flag-icon-is"></span> Icelander</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('indian')"><span class="flag-icon flag-icon-in"></span> Indian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('indonesian')"><span class="flag-icon flag-icon-id"></span> Indonesian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('iranian')"><span class="flag-icon flag-icon-ir"></span> Iranian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('iraqi')"><span class="flag-icon flag-icon-iq"></span> Iraqi</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('irish')"><span class="flag-icon flag-icon-ie"></span> Irish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('israeli')"><span class="flag-icon flag-icon-il"></span> Israeli</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('italian')"><span class="flag-icon flag-icon-it"></span> Italian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ivorian')"><span class="flag-icon flag-icon-ci"></span> Ivorian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('jamaican')"><span class="flag-icon flag-icon-jm"></span> Jamaican</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('japanese')"><span class="flag-icon flag-icon-jp"></span> Japanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('jordanian')"><span class="flag-icon flag-icon-jo"></span> Jordanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('kazakhstani')"><span class="flag-icon flag-icon-kz"></span> Kazakhstani</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('kenyan')"><span class="flag-icon flag-icon-ke"></span> Kenyan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('kittian and nevisian')"><span class="flag-icon flag-icon-kn"></span> Kittian and Nevisian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('kuwaiti')"><span class="flag-icon flag-icon-kw"></span> Kuwaiti</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('kyrgyz')"><span class="flag-icon flag-icon-kg"></span> Kyrgyz</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('laotian')"><span class="flag-icon flag-icon-la"></span> Laotian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('latvian')"><span class="flag-icon flag-icon-lv"></span> Latvian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('lebanese')"><span class="flag-icon flag-icon-lb"></span> Lebanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('liberian')"><span class="flag-icon flag-icon-lr"></span> Liberian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('libyan')"><span class="flag-icon flag-icon-ly"></span> Libyan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('liechtensteiner')"><span class="flag-icon flag-icon-li"></span> Liechtensteiner</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('lithuanian')"><span class="flag-icon flag-icon-lt"></span> Lithuanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('luxembourger')"><span class="flag-icon flag-icon-lu"></span> Luxembourger</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('macedonian')"><span class="flag-icon flag-icon-mk"></span> Macedonian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('malagasy')"><span class="flag-icon flag-icon-mg"></span> Malagasy</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('malawian')"><span class="flag-icon flag-icon-mw"></span> Malawian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('malaysian')"><span class="flag-icon flag-icon-my"></span> Malaysian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('maldivan')"><span class="flag-icon flag-icon-mv"></span> Maldivan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('malian')"><span class="flag-icon flag-icon-ml"></span> Malian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('maltese')"><span class="flag-icon flag-icon-mt"></span> Maltese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('marshallese')"><span class="flag-icon flag-icon-mh"></span> Marshallese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mauritanian')"><span class="flag-icon flag-icon-mr"></span> Mauritanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mauritian')"><span class="flag-icon flag-icon-mu"></span> Mauritian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mexican')"><span class="flag-icon flag-icon-mx"></span> Mexican</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('micronesian')"><span class="flag-icon flag-icon-fm"></span> Micronesian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('moldovan')"><span class="flag-icon flag-icon-md"></span> Moldovan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('monacan')"><span class="flag-icon flag-icon-mc"></span> Monacan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mongolian')"><span class="flag-icon flag-icon-mn"></span> Mongolian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('moroccan')"><span class="flag-icon flag-icon-ma"></span> Moroccan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mosotho')"><span class="flag-icon flag-icon-ls"></span> Mosotho</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('motswana')"><span class="flag-icon flag-icon-bw"></span> Motswana</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('mozambican')"><span class="flag-icon flag-icon-mz"></span> Mozambican</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('namibian')"><span class="flag-icon flag-icon-na"></span> Namibian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('nauruan')"><span class="flag-icon flag-icon-nr"></span> Nauruan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('nepalese')"><span class="flag-icon flag-icon-np"></span> Nepalese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('new zealander')"><span class="flag-icon flag-icon-nz"></span> New Zealander</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ni-vanuatu')"><span class="flag-icon flag-icon-vu"></span> Ni-Vanuatu</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('nicaraguan')"><span class="flag-icon flag-icon-ni"></span> Nicaraguan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('nigerien')"><span class="flag-icon flag-icon-ne"></span> Nigerien</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('north korean')"><span class="flag-icon flag-icon-kp"></span> North Korean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('northern irish')"><span class="flag-icon flag-icon-gb-nir"></span> Northern Irish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('norwegian')"><span class="flag-icon flag-icon-no"></span> Norwegian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('omani')"><span class="flag-icon flag-icon-om"></span> Omani</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('pakistani')"><span class="flag-icon flag-icon-pk"></span> Pakistani</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('palauan')"><span class="flag-icon flag-icon-pw"></span> Palauan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('panamanian')"><span class="flag-icon flag-icon-pa"></span> Panamanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('papua new guinean')"><span class="flag-icon flag-icon-pg"></span> Papua New Guinean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('paraguayan')"><span class="flag-icon flag-icon-py"></span> Paraguayan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('peruvian')"><span class="flag-icon flag-icon-pe"></span> Peruvian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('polish')"><span class="flag-icon flag-icon-pl"></span> Polish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('portuguese')"><span class="flag-icon flag-icon-pt"></span> Portuguese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('qatari')"><span class="flag-icon flag-icon-qa"></span> Qatari</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('romanian')"><span class="flag-icon flag-icon-ro"></span> Romanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('russian')"><span class="flag-icon flag-icon-ru"></span> Russian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('rwandan')"><span class="flag-icon flag-icon-rw"></span> Rwandan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('saint lucian')"><span class="flag-icon flag-icon-lc"></span> Saint Lucian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('salvadoran')"><span class="flag-icon flag-icon-sv"></span> Salvadoran</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('samoan')"><span class="flag-icon flag-icon-ws"></span> Samoan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('san marinese')"><span class="flag-icon flag-icon-sm"></span> San Marinese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('sao tomean')"><span class="flag-icon flag-icon-st"></span> Sao Tomean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('saudi')"><span class="flag-icon flag-icon-sa"></span> Saudi</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('scottish')"><span class="flag-icon flag-icon-gb-sct"></span> Scottish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('senegalese')"><span class="flag-icon flag-icon-sn"></span> Senegalese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('serbian')"><span class="flag-icon flag-icon-rs"></span> Serbian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('seychellois')"><span class="flag-icon flag-icon-sc"></span> Seychellois</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('sierra leonean')"><span class="flag-icon flag-icon-sl"></span> Sierra Leonean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('singaporean')"><span class="flag-icon flag-icon-sg"></span> Singaporean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('slovakian')"><span class="flag-icon flag-icon-sk"></span> Slovakian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('slovenian')"><span class="flag-icon flag-icon-si"></span> Slovenian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('solomon islander')"><span class="flag-icon flag-icon-sb"></span> Solomon Islander</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('somali')"><span class="flag-icon flag-icon-so"></span> Somali</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('south african')"><span class="flag-icon flag-icon-za"></span> South African</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('south korean')"><span class="flag-icon flag-icon-kr"></span> South Korean</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('spanish')"><span class="flag-icon flag-icon-es"></span> Spanish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('sri lankan')"><span class="flag-icon flag-icon-lk"></span> Sri Lankan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('sudanese')"><span class="flag-icon flag-icon-sd"></span> Sudanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('surinamer')"><span class="flag-icon flag-icon-sr"></span> Surinamer</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('swazi')"><span class="flag-icon flag-icon-sz"></span> Swazi</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('swedish')"><span class="flag-icon flag-icon-se"></span> Swedish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('swiss')"><span class="flag-icon flag-icon-ch"></span> Swiss</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('syrian')"><span class="flag-icon flag-icon-sy"></span> Syrian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('taiwanese')"><span class="flag-icon flag-icon-tw"></span> Taiwanese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('tajik')"><span class="flag-icon flag-icon-tj"></span> Tajik</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('tanzanian')"><span class="flag-icon flag-icon-tz"></span> Tanzanian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('thai')"><span class="flag-icon flag-icon-th"></span> Thai</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('togolese')"><span class="flag-icon flag-icon-tg"></span> Togolese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('tongan')"><span class="flag-icon flag-icon-to"></span> Tongan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('trinidadian or tobagonian')"><span class="flag-icon flag-icon-tt"></span> Trinidadian or Tobagonian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('tunisian')"><span class="flag-icon flag-icon-tn"></span> Tunisian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('turkish')"><span class="flag-icon flag-icon-tr"></span> Turkish</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('tuvaluan')"><span class="flag-icon flag-icon-tv"></span> Tuvaluan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ugandan')"><span class="flag-icon flag-icon-ug"></span> Ugandan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('ukrainian')"><span class="flag-icon flag-icon-ua"></span> Ukrainian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('uruguayan')"><span class="flag-icon flag-icon-uy"></span> Uruguayan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('uzbekistani')"><span class="flag-icon flag-icon-uz"></span> Uzbekistani</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('venezuelan')"><span class="flag-icon flag-icon-ve"></span> Venezuelan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('vietnamese')"><span class="flag-icon flag-icon-vn"></span> Vietnamese</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('welsh')"><span class="flag-icon flag-icon-gb-wls"></span> Welsh</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('yemenite')"><span class="flag-icon flag-icon-ye"></span> Yemenite</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('zambian')"><span class="flag-icon flag-icon-zm"></span> Zambian</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectNationality('zimbabwean')"><span class="flag-icon flag-icon-zw"></span> Zimbabwean</a></li>
+                                    </ul>
+                                </div>
+                            </form>
+
+                            <div class="col-6 d-flex flex-row-reverse" th:if="${nationalities != null && !nationalities.isEmpty()}">
+                                <a href="/stats" class="btn btn-default mb-auto">
+                                    <span>Return to Global View</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <script>
+                            const selectedNationalities = new Set();
+                            for (let i = 0; i < nationalities.length; i++) {
+                                selectedNationalities.add(nationalities[i]);
+                            }
+
+                            function selectNationality(nationality) {
+                                if (selectedNationalities.has(nationality)) {
+                                    selectedNationalities.delete(nationality);
+                                } else {
+                                    selectedNationalities.add(nationality.valueOf());
+                                }
+                                document.getElementById('nationalityInput').value = Array.from(selectedNationalities).join(',');
+                                document.getElementById('nationalityForm').submit();
+                            }
+                        </script>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="alert alert-primary text-center" style="padding: 0.5rem;">
+                                    <h4 th:if="${nationalities == null || nationalities.isEmpty()}" class="alert-heading" style="margin: 0;">Global Summary Statistics</h4>
+                                    <h4 th:if="${nationalities != null && !nationalities.isEmpty()}" class="alert-heading" style="margin: 0;" th:text="'National Summary Statistics'"></h4>
+                                    <hr th:if="${nationalities != null && !nationalities.isEmpty()}" class="m-0">
+                                    <p th:if="${nationalities != null && !nationalities.isEmpty()}" class="mb-0" th:text="'Selected: ' + ${#strings.listCapitalize(nationalities)}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="alert alert-warning text-center" style="height: 90%;">
+                                    <h6 class="font-weight-bold fs-6 text-white">Total Doses Administered</h6>
+                                    <div class="h-50 align-content-center">
+                                        <p class="font-weight-bold" th:text="${totalDoses}"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="alert alert-warning text-center" style="height: 90%;">
+                                    <h6 class="font-weight-bold fs-6 text-white">Total People Vaccinated</h6>
+                                    <div class="h-50 align-content-center">
+                                        <p class="font-weight-bold" th:text="${totalPeople}"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="alert alert-success text-center" style="height: 90%;">
+                                    <h6 class="font-weight-bold fs-6 text-white">Gender Distribution</h6>
+                                    <div class="h-75 align-content-center">
+                                        <p class="font-weight-bold" th:text="'Male ' + ${#numbers.formatInteger(maleDosePercent,1)} + '%'"></p>
+                                        <p class="font-weight-bold" th:text="'Female ' + ${#numbers.formatInteger(femaleDosePercent,1)} + '%'"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <div class="alert alert-success text-center" style="height: 90%;">
+                                    <h6 class="font-weight-bold fs-6 text-white">Brand Distribution</h6>
+                                    <div class="h-75 align-content-center">
+                                        <p class="font-weight-bold" id="vaccine-type-distribution"></p>
+                                    </div>
+                                </div>
+                                <script>
+                                    const container = document.getElementById("vaccine-type-distribution");
+                                    for (const [type, data] of Object.entries(statsByVaccineType)) {
+                                        const percentage = Math.round((data.total / totalDoses) * 100);
+                                        container.innerHTML += `${type.charAt(0).toUpperCase() + type.slice(1)} ${percentage}%<br>`;
+                                    }
+                                </script>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="container-fluid mt-0 pt-0">
+                        <div class="nav-wrapper">
+                            <ul class="nav nav-pills nav-justified flex-column flex-sm-row" id="tabs-text" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link mb-sm-3 mb-md-0" id="tabs-text-1-tab" data-toggle="tab" href="#tabs-text-1" role="tab" aria-controls="tabs-text-1" aria-selected="true">
+                                        <i class="fa fa-line-chart"></i>
+                                        Line Chart View
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link mb-sm-3 mb-md-0 active" id="tabs-text-2-tab" data-toggle="tab" href="#tabs-text-2" role="tab" aria-controls="tabs-text-2" aria-selected="true">
+                                        <i class="fa fa-bar-chart"></i>
+                                        Bar Chart View
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link mb-sm-3 mb-md-0" id="tabs-text-3-tab" data-toggle="tab" href="#tabs-text-3" role="tab" aria-controls="tabs-text-3" aria-selected="false">
+                                        <i class="fa fa-pie-chart"></i>
+                                        Doughnut View
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                                <canvas id="vaccineTypeChart"></canvas>
+                                <canvas id="nationalitiesChart"></canvas>
+                                <canvas id="ageChart"></canvas>
+                                <canvas id="genderChart"></canvas>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:insert="fragments/chatbot :: chatbot"></div>
+        <footer th:insert="fragments/footer :: footer"></footer>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $(".birth-datepicker").datepicker({
+                format: "dd/mm/yyyy",
+                endDate: "-18y",
+            });
+
+            $(".vaccine-datepicker").datepicker({
+                format: "dd/mm/yyyy",
+            });
+
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let charts;
+
+            // Get the selected chart tab type
+            function getSelectedView() {
+                const activeTab = document.querySelector('.nav-link.active');
+                if (activeTab.id === 'tabs-text-1-tab') {
+                    return 'line';
+                } else if (activeTab.id === 'tabs-text-2-tab') {
+                    return 'bar';
+                } else {
+                    return 'doughnut';
+                }
+            }
+
+            function createCharts() {
+                const ageCtx = document.getElementById('ageChart').getContext('2d');
+                const genderCtx = document.getElementById('genderChart').getContext('2d');
+                const vaccineCtx = document.getElementById('vaccineTypeChart').getContext('2d');
+                const nationalitiesCtx = document.getElementById('nationalitiesChart').getContext('2d');
+                const ageLabels = Object.keys(ageRanges);
+                const ageData = Object.values(ageRanges);
+
+                const commonDatasetOptions = {
+                    backgroundColor: ["cyan", "pink", "green", "skyblue", "teal", "gray", "red", "orange"],
+                    // borderColor: 'rgba(75, 192, 192, 1)',
+                    // borderWidth: 1,
+                };
+                const commonOptions = {
+                    scales: { y: { beginAtZero: true } },
+                    legend: {
+                        display: false
+                    }
+                    /* animation: { duration: 0 } // disable animation */
+                }
+
+                const ageChart = new Chart(ageCtx, {
+                    type: getSelectedView(),
+                    data: {
+                        labels: ageLabels,
+                        datasets: [{
+                            label: 'Percentage of People by Age Group',
+                            data: ageData,
+                            ...commonDatasetOptions
+                        }]
+                    },
+                    options: {...commonOptions}
+                });
+
+                const genderChart = new Chart(genderCtx, {
+                    type: getSelectedView(),
+                    data: {
+                        labels: ['Male', 'Female'],
+                        datasets: [{
+                            label: 'Percentage of People by Gender',
+                            data: [maleDosePercent, femaleDosePercent],
+                            ...commonDatasetOptions,
+                        }]
+                    },
+                    options: {...commonOptions}
+                });
+
+                const vaccineTypesCapitalised = Object.keys(statsByVaccineType).map(type => type.charAt(0).toUpperCase() + type.slice(1));
+                const vaccineTypeTotals = Object.keys(statsByVaccineType).map(type => statsByVaccineType[type].total);
+                const vaccineTypeChart = new Chart(vaccineCtx, {
+                    type: getSelectedView(),
+                    data: {
+                        labels: vaccineTypesCapitalised,
+                        datasets: [{
+                            label: 'Number of Vaccines by Type',
+                            data: vaccineTypeTotals,
+                            ...commonDatasetOptions,
+                        }]
+                    },
+                    options: {...commonOptions}
+                });
+
+                const nationalitiesChart = new Chart(nationalitiesCtx, {
+                    type: getSelectedView(),
+                    data: {
+                        labels: Object.keys(dosesByAllNationalities),
+                        datasets: [{
+                            label: 'Doses by Nationality',
+                            data: Object.values(dosesByAllNationalities),
+                            ...commonDatasetOptions
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                ticks: {
+                                    autoSkip: false // shows all labels for nationalities
+                                }
+                            }
+                        }
+                    }
+                });
+                charts = [ageChart, genderChart, vaccineTypeChart, nationalitiesChart];
+            }
+
+            // Update the chart (initially called .update(), but instead destroys and creates due to bug in ChartJS)
+            function updateChart() {
+                charts.forEach(chart => {chart.destroy();});
+                createCharts();
+            }
+
+            createCharts();
+
+            // Event listeners for when tabs are selected
+            const tabs = document.querySelectorAll('.nav-link');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    setTimeout(() => {
+                        updateChart();
+                    }, 100); // Timeout to allow for the tab transition
+                });
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

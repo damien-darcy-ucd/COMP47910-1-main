@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="fragments/head :: head"></head>
+
+<body class="index-page">
+    <div th:replace="fragments/navbar:: navbar"></div>
+
+    <div class="wrapper">
+        <div class="section section-shaped bg-secondary">
+            <div class="navbar-background"></div>
+            <div class="page-header">
+                <div class="container shape-container py-lg">
+                    <div class="card mt-3 shadow-sm" style="width: 100%;">
+                        <div class="card-body py-3 px-5">
+                            <form action="find-user" method="POST">
+                                <h5 class="card-title mb-3">Find user</h5>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="fa fa-user"></i>
+                                        </span>
+                                    </div>
+                                    <input class="form-control" placeholder="Full Name or PPS number" type="text"
+                                        name="input">
+                                </div>
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="btn-inner--icon"><i class="fa fa-search mr-1"></i></span>
+                                    Search
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <th:block th:with="partitions=${T(org.apache.commons.collections4.ListUtils).partition(users, 5)}">
+                        <div class="card-group mr--1" th:each="partition: ${partitions}">
+                            <div class="card mt-3 shadow-sm d-inline-block mr-2" style="width: 10rem; height: 12rem"
+                                th:each="user : ${partition}">
+                                <a th:href="@{/profile/{id}(id=${user.getId()})}">
+                                    <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
+                                        <div th:if="${usersPending.contains(user)}" class="badge-wrapper position-absolute" style="top: 0.5rem; left: 0.5rem;">
+                                            <span class="badge badge-circle badge-danger shadow">
+                                                <i class="fa fa-bell"></i>
+                                            </span>
+                                        </div>
+                                        <img th:src="${'https://eu.ui-avatars.com/api/?name='+user.getFullName()}"
+                                            class="rounded-circle" />
+
+                                        <span th:if="${user.isAdmin()}" class="badge badge-warning mt-2 mb-1">Admin</span>
+                                        <span th:if="${!user.isAdmin()}" class="badge badge-primary mt-2 mb-1">User</span>
+
+                                        <h5 class="card-title text-center" th:text="${user.getFullName()}">
+                                            Full Name
+                                        </h5>
+
+                                    </div>
+                                </a>
+                            </div>
+
+                            <th:block th:if="${partition.size() < 5}">
+                                <th:block th:each="i: ${#numbers.sequence(1, 5 - partition.size())}">
+                                    <div class="card mt-3 shadow-sm d-inline-block mr-2" style="width: 10rem; height: 12rem">
+
+
+                                    </div>
+                                </th:block>
+                            </th:block>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:insert="fragments/chatbot :: chatbot"></div>
+    <footer th:insert="fragments/footer :: footer"></footer>
+    </div>
+</body>
+
+</html>
